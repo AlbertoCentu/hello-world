@@ -60,14 +60,18 @@ Installazione del servizio (`mariadb-server`) e del client CLI (`mariadb`)
   systemctl enable mariadb
 ```
 Esecuzione script per rimuovere alcune impostazioni di default pericolose:
-- password dell'utente root del DBMS
-- accesso utente anonimo
-- accesso da remoto consentito all'utente root
+- password dell'utente root del DBMS --> da impostare per proteggere l'accesso
+- accesso utente anonimo --> da impedire
+- accesso da remoto per l'utente root --> da impedire
 
 ```
   mysql_secure_installation
 ```
-Testing del servizio da localhost con il client CLI `mariadb`
+Testing del servizio da localhost con il client CLI
+```
+  mysql -u root -p
+```
+accede al dbms con l'utente root, per il quale sar&aacute; richiesta la password (opzione -p)
 
 ### *PHP*
 Installazione della versione di default e verifica della versione
@@ -98,7 +102,7 @@ Si procede con l'installazione di phpMyAdmin
 ```
   yum install phpmyadmin
 ```
-Testare il funzionamento via browser da host remoto
+Testare il funzionamento via browser da host remoto `http://<ip_server>/phpmyadmin`<br/>
 Configurazione sulle politiche di accesso alle directory (fare una copia del file di configurazione originale).<br/>
 Il setup originale prevede che sia ngato l'accesso per qualsiasi connessione che non provenga dal server stesso (127.0.0.1). Per accedere da remoto è necessario modificare tale impostazione e specificare l'indirizzo IP dell'host (o gli indirizzi) dal quale ci si vuole connettere. Per fare questo, nel file di configurazione sostiture tutte le stringhe `127.0.0.1` con l'ind IP della o delle macchine host.<br/>
 Testare il funzionamento via browser `http://<ip_server>/phpmyadmin` e accedere utilizzando le credenziali dell'utente root del DBMS (come precedentemente impostate).<br/>
@@ -179,9 +183,9 @@ creare il file vuoto `chroot_list`
   touch /etc/vsftpd/chroot_list
 ```
 Testing ...<br/>
-Se non funziona &eacute; necessario abilitare il boolean di SELinux `ftpd_allow_full_access`
+Se non funziona &eacute; necessario abilitare il boolean di SELinux `ftpd_full_access`
 ```
-  setsebool -P ftpd_allow_full_access on
+  setsebool -P ftpd_full_access on
 ```
 Testing ...<br/>
 **File di configurazione per le impostazioni correnti** `vsftpd.conf.01`
@@ -234,7 +238,7 @@ L'esempio che segue &eacute; per l'utente `sito01` (replicare le parti necessari
 ```
   mkdir -p /var/www/html/sito01
   chown ftp: /var/www/html/sito01
-  setsebool -P allow_ftpd_full_access_on
+  setsebool -P allow_ftpd_full_access on
   semanage fcontext -a -t public_content_rw_t "/var/www/html(/.*)?"
   restorecon -R -v /var/www/html
 ```
